@@ -57,14 +57,32 @@ pipeline {
                         _resp="$WORKSPACE/vault_backend.json"
                         _dest="$WORKSPACE/.env"
 
-                        echo "Fetching secrets from Vault: $VAULT_MOUNT/data/$VAULT_ENV/$VAULT_PATH ..."
-                        curl -fsS --cacert "$VAULT_CACERT" --resolve "$VAULT_RESOLVE" \
+                        _url_v2="$VAULT_ADDR/v1/$VAULT_MOUNT/data/$VAULT_ENV/$VAULT_PATH"
+                        _url_v1="$VAULT_ADDR/v1/$VAULT_MOUNT/$VAULT_ENV/$VAULT_PATH"
+
+                        echo "Fetching secrets from Vault..."
+                        _status=$(curl -sS --cacert "$VAULT_CACERT" --resolve "$VAULT_RESOLVE" \
                             -H "X-Vault-Token: $VAULT_TOKEN" \
-                            "$VAULT_ADDR/v1/$VAULT_MOUNT/data/$VAULT_ENV/$VAULT_PATH" > "$_resp"
+                            -o "$_resp" -w "%{http_code}" "$_url_v2" || echo "000")
+
+                        if [ "$_status" != "200" ]; then
+                            echo "KV v2 endpoint returned HTTP $_status. Retrying with KV v1 endpoint ($_url_v1)..."
+                            _status=$(curl -sS --cacert "$VAULT_CACERT" --resolve "$VAULT_RESOLVE" \
+                                -H "X-Vault-Token: $VAULT_TOKEN" \
+                                -o "$_resp" -w "%{http_code}" "$_url_v1" || echo "000")
+                        fi
+
+                        if [ "$_status" != "200" ]; then
+                            echo "ERROR: Vault request failed with HTTP status $_status"
+                            if [ -f "$_resp" ]; then
+                                cat "$_resp"
+                            fi
+                            exit 1
+                        fi
 
                         # Accept both KV v1 and KV v2 payload shapes.
                         jq -e '((.data.data // .data // {}) | type) == "object"' "$_resp" >/dev/null || {
-                            echo "ERROR: unexpected Vault payload at $VAULT_MOUNT/data/$VAULT_ENV/$VAULT_PATH"
+                            echo "ERROR: unexpected Vault payload at $_resp"
                             sed -E 's/(X-Vault-Token:|token=|password=)[^[:space:]]+/\\1[REDACTED]/g' "$_resp"
                             exit 1
                         }

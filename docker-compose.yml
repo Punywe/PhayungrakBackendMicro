@@ -17,7 +17,7 @@ services:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     restart: unless-stopped
-    mem_limit: 128m
-    mem_reservation: 256m
-    cpus: 0.1
+    # mem_limit: 128m
+    # mem_reservation: 256m
+    # cpus: 0.1
 
