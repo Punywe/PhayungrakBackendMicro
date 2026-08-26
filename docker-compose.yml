@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: payoongrak_backend
+    ports:
+      - "13000:13000"
+    environment:
+      - NODE_ENV=development
+      - PORT=13000
+    env_file:
+      - .env
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    restart: unless-stopped
+    mem_limit: 128m
+    mem_reservation: 256m
+    cpus: 0.1
+
