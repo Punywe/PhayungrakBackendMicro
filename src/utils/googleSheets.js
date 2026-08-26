@@ -6,22 +6,35 @@ const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
 // ตั้งค่า Google Auth จาก Environment Variables (Service Account Credentials)
 let auth;
 try {
-  const credentials = {
-    type:                        process.env.GOOGLE_SA_TYPE || 'service_account',
-    project_id:                  process.env.GOOGLE_SA_PROJECT_ID,
-    private_key_id:              process.env.GOOGLE_SA_PRIVATE_KEY_ID,
-    private_key:                 (process.env.GOOGLE_SA_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
-    client_email:                process.env.GOOGLE_SA_CLIENT_EMAIL,
-    client_id:                   process.env.GOOGLE_SA_CLIENT_ID,
-    auth_uri:                    process.env.GOOGLE_SA_AUTH_URI        || 'https://accounts.google.com/o/oauth2/auth',
-    token_uri:                   process.env.GOOGLE_SA_TOKEN_URI       || 'https://oauth2.googleapis.com/token',
-    auth_provider_x509_cert_url: process.env.GOOGLE_SA_AUTH_PROVIDER_X509_CERT_URL || 'https://www.googleapis.com/oauth2/v1/certs',
-    client_x509_cert_url:        process.env.GOOGLE_SA_CLIENT_X509_CERT_URL,
-    universe_domain:             process.env.GOOGLE_SA_UNIVERSE_DOMAIN || 'googleapis.com',
-  };
+  let credentials;
+
+  if (process.env.GOOGLE_SA_CREDENTIALS_B64) {
+    // วิธีที่ 1: ใช้ Base64 ของไฟล์ credentials.json ทั้งไฟล์ (แนะนำ)
+    const json = Buffer.from(process.env.GOOGLE_SA_CREDENTIALS_B64, 'base64').toString('utf8');
+    credentials = JSON.parse(json);
+  } else {
+    // วิธีที่ 2: ใช้ ENV แยกค่า (private_key ต้องเป็น Base64 ใน GOOGLE_SA_PRIVATE_KEY_B64)
+    const privateKey = process.env.GOOGLE_SA_PRIVATE_KEY_B64
+      ? Buffer.from(process.env.GOOGLE_SA_PRIVATE_KEY_B64, 'base64').toString('utf8')
+      : (process.env.GOOGLE_SA_PRIVATE_KEY || '').replace(/\\n/g, '\n');
+
+    credentials = {
+      type:                        process.env.GOOGLE_SA_TYPE || 'service_account',
+      project_id:                  process.env.GOOGLE_SA_PROJECT_ID,
+      private_key_id:              process.env.GOOGLE_SA_PRIVATE_KEY_ID,
+      private_key:                 privateKey,
+      client_email:                process.env.GOOGLE_SA_CLIENT_EMAIL,
+      client_id:                   process.env.GOOGLE_SA_CLIENT_ID,
+      auth_uri:                    process.env.GOOGLE_SA_AUTH_URI        || 'https://accounts.google.com/o/oauth2/auth',
+      token_uri:                   process.env.GOOGLE_SA_TOKEN_URI       || 'https://oauth2.googleapis.com/token',
+      auth_provider_x509_cert_url: process.env.GOOGLE_SA_AUTH_PROVIDER_X509_CERT_URL || 'https://www.googleapis.com/oauth2/v1/certs',
+      client_x509_cert_url:        process.env.GOOGLE_SA_CLIENT_X509_CERT_URL,
+      universe_domain:             process.env.GOOGLE_SA_UNIVERSE_DOMAIN || 'googleapis.com',
+    };
+  }
 
   if (!credentials.client_email || !credentials.private_key) {
-    throw new Error('Missing GOOGLE_SA_CLIENT_EMAIL or GOOGLE_SA_PRIVATE_KEY in environment variables');
+    throw new Error('Missing client_email or private_key in Google credentials');
   }
 
   auth = new google.auth.GoogleAuth({
@@ -33,6 +46,7 @@ try {
 }
 
 const sheets = google.sheets({ version: 'v4', auth });
+
 
 /**
 
