@@ -103,7 +103,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'docker compose -p "$COMPOSE_PROJECT" -f "$COMPOSE_FILE_PATH" build'
+                sh 'docker compose -p "$COMPOSE_PROJECT" -f "$COMPOSE_FILE_PATH" build --no-cache'
             }
         }
 
