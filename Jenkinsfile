@@ -111,7 +111,8 @@ pipeline {
             steps {
                 sh '''
                     set -e
-                    docker compose -p "$COMPOSE_PROJECT" -f "$COMPOSE_FILE_PATH" up -d --force-recreate --remove-orphans
+                    docker compose -p "$COMPOSE_PROJECT" -f "$COMPOSE_FILE_PATH" down -v
+                    docker compose -p "$COMPOSE_PROJECT" -f "$COMPOSE_FILE_PATH" up -d --remove-orphans
                     docker image prune -f
                 '''
             }
