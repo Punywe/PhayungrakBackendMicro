@@ -13,6 +13,9 @@ services:
       - PORT=13000
     env_file:
       - .env
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
     restart: unless-stopped
     # mem_limit: 128m
     # mem_reservation: 256m
