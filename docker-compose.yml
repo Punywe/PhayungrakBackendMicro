@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   backend:
     build:
@@ -17,7 +15,8 @@ services:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     restart: unless-stopped
-    mem_limit: 128m
-    mem_reservation: 256m
+    mem_limit: 256m
+    mem_reservation: 128m
     cpus: 0.1
+
 
