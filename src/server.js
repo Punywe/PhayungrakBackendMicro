@@ -7,11 +7,9 @@ const apiRouter = require('./routes/index');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const frontendOrigin = process.env.FRONTEND_ORIGIN;
+
 // Middleware พื้นฐานสำหรับจัดการข้อมูลที่ส่งเข้ามา
-app.use(cors({
-  origin: [frontendOrigin, 'http://localhost:3001']
-})); // อนุญาตให้ Android App เรียกใช้งานได้
+app.use(cors()); // อนุญาตให้ Flutter, Web และ API Clients เรียกใช้งานได้
 app.use(express.json()); // อ่านข้อมูล JSON จาก Body
 app.use(express.urlencoded({ extended: true })); // อ่านข้อมูล Form URL-Encoded
 
@@ -33,7 +31,7 @@ app.use((req, res, next) => {
 
 // Middleware จัดการกรณีเกิด Server Error (500 Error)
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error('Unhandled Error:', err);
   res.status(500).json({
     success: false,
     message: 'เกิดข้อผิดพลาดภายในระบบหลังบ้าน (Internal Server Error)',
@@ -49,3 +47,5 @@ app.listen(PORT, () => {
   console.log(`🏥 Health check: http://localhost:${PORT}/api/health`);
   console.log(`========================================`);
 });
+
+module.exports = app;

@@ -1,30 +1,35 @@
 const express = require('express');
 const router = express.Router();
 
-// นำเข้า (Import) routes ย่อยๆ
-const exampleRouter = require('./example');
+// นำเข้า Router ย่อยแต่ละโมดูล
 const authRouter = require('./auth');
+const pairRouter = require('./pair');
+const devicesRouter = require('./devices');
+const addDataESPRouter = require('./addDataESP');
 const realtimeRouter = require('./realtime');
 const hourlyRouter = require('./hourly');
 const weeklyRouter = require('./weekly');
-const addDataESP = require('./addDataESP');
+const patientsRouter = require('./patients');
+const alertsRouter = require('./alerts');
 
-// หน้าแรกสุดของ API (เอาไว้ทดสอบระบบ)
+// Health Check Endpoint
 router.get('/health', (req, res) => {
   res.json({
     status: 'UP',
-    message: 'Backend Service is running smoothly',
+    message: 'Payoongrak Backend Microservice is running smoothly',
     timestamp: new Date().toISOString()
   });
 });
 
-// เชื่อมเส้นทาง API (สามารถเพิ่มชุดใหม่ๆ ตรงนี้ได้เลยเมื่อมีไฟล์เพิ่มขึ้น)
-router.use('/example', exampleRouter);
+// เชื่อมต่อแต่ละ Endpoint เข้ากับเส้นทางย่อย
 router.use('/auth', authRouter);
+router.use('/pair', pairRouter);
+router.use('/devices', devicesRouter);
+router.use('/addDataESP', addDataESPRouter);
 router.use('/realtime', realtimeRouter);
 router.use('/hourly', hourlyRouter);
 router.use('/weekly', weeklyRouter);
-router.use('/addDataESP', addDataESP);
+router.use('/patients', patientsRouter);
+router.use('/alerts', alertsRouter);
 
-// ส่งออก router หลัก
 module.exports = router;

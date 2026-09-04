@@ -26,3 +26,8 @@ credentials.json
 *.sln
 *.sw?
 **/credentials.json
+
+# Bruno API Client Collection
+bruno/
+*.bru
+

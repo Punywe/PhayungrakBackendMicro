@@ -30,3 +30,6 @@ README.md
 .idea/
 .DS_Store
 Thumbs.db
+bruno/
+*.bru
+
